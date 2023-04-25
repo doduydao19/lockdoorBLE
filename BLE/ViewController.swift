@@ -9,10 +9,11 @@ import UIKit
 import Parse
 
 struct Data {}
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextFieldDelegate {
     let apiKey = "3cc5abbc5e2e497db70731661d96d812"
-    let data = Data()
-    var st = ""
+    var st = "" // link local get after call api
+    var username = ""
+    var password = ""
     @Published var hasError = false
 
     @Published var isSigningIn = false
@@ -30,11 +31,12 @@ class ViewController: UIViewController {
         backgroundImage.image = UIImage(named: "bg_guest_start")
         backgroundImage.contentMode = .scaleAspectFill
         view.insertSubview(backgroundImage, at: 0)
-
+        textUsername.delegate = self
+        textPassword.delegate = self
     }
     
     @IBAction func signin(_ sender: UIButton) {
-      sendConfirmationRequest() { isSigningIn in
+//        self.sendConfirmationRequest()
         if isSigningIn {
             DispatchQueue.main.async {
                 self.performSegue(withIdentifier: "abc", sender: nil)
@@ -42,8 +44,18 @@ class ViewController: UIViewController {
         } else {
             print("not ok")
         }
+      
     }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // Xử lý sự kiện thay đổi của text field ở đây
+//        print("Text field changed: \(textUsername.text ?? "")")
+        self.username = self.textUsername.text ?? ""
+        self.password = self.textPassword.text ?? ""
+        self.sendConfirmationRequest()
+        return true
     }
+    
     func displayAlert(withTitle title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "Ok", style: .default)
@@ -52,7 +64,7 @@ class ViewController: UIViewController {
     }
     
 
-    func sendConfirmationRequest(completion: @escaping (Bool) -> Void) {
+    func sendConfirmationRequest() {
 //        self.hasError = true
 //        let url = URL(string: "https://cloud.estech777.com/v1/auth/confirm")!
 ////        let authData = (self.username + "=" + self.password).data(using: .utf8)!.base64EncodedString()
@@ -83,11 +95,6 @@ class ViewController: UIViewController {
                     print("Error took place \(error)")
                     return
                 }
-         
-                // Convert HTTP Response Data to a String
-//                if let data = data, let dataString = String(data: data, encoding: .utf8) {
-//                    print("Response data string:\n \(dataString)")
-//                }
             if let data = data {
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
@@ -100,16 +107,11 @@ class ViewController: UIViewController {
                             }
 //                        let errors = json["error"] as? String ?? ""
                         if let data = json["data"] as? [String: Any] {
-                                print("Hotel URL: \(data)")
+                            self.st = (data["hotelUrl"] as? String ?? "")
                             self.isSigningIn = true
                         } else {
                             self.isSigningIn = false
                         }
-//                        if datat != ""{
-//                            self.isSigningIn = false
-//                        } else {
-//                            self.isSigningIn = true
-//                        }
                     }
                 } catch {
                     print("Error: \(error.localizedDescription)")
@@ -117,11 +119,14 @@ class ViewController: UIViewController {
             }
         }
         task.resume()
-        completion(isSigningIn)
+
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destinationViewController = segue.destination as? SecondViewController {
-            destinationViewController.data = self.st
+            destinationViewController.linkLocal = self.st
+            destinationViewController.userName = self.username
+            destinationViewController.password = self.password
+            destinationViewController.apikey = self.apiKey
         }
     }
 }
