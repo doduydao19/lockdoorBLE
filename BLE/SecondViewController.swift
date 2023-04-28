@@ -8,6 +8,7 @@
 import UIKit
 import CoreBluetooth
 
+
 class SecondViewController: UIViewController, CBCentralManagerDelegate {
     var linkLocal: String?
     var userName: String?
