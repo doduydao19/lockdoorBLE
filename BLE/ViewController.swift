@@ -65,13 +65,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
 
     func sendConfirmationRequest() {
-//        self.hasError = true
-//        let url = URL(string: "https://cloud.estech777.com/v1/auth/confirm")!
-////        let authData = (self.username + "=" + self.password).data(using: .utf8)!.base64EncodedString()
-//        var request = URLRequest(url: url)
-//
-//        request.addValue(self.apiKey, forHTTPHeaderField: "x-api-key")
-//        request.httpMethod = "POST"
+
         let phoneNumber = self.textUsername.text ?? ""
         let confirmationCode = self.textPassword.text ?? ""
         self.st = phoneNumber

@@ -20,6 +20,8 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
     var keyaccess = ""
     var peri: CBPeripheral?
     
+    @IBOutlet weak var labelStatus: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -31,6 +33,7 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
             central.scanForPeripherals(withServices: nil, options: nil)
+            labelStatus.text = "접속중"
         } else {
             print("Bluetooth not available.")
         }
@@ -44,8 +47,9 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
         var rssi = RSSI as! Int
         if name.contains(nameDevice) && rssi > -65 {
                 // Kết nối đến thiết bị BLE
-                print("ket noi thanh cong")
-                centralManager.connect(peripheral, options: nil)
+            print("ket noi thanh cong")
+            labelStatus.text = "접속완료"
+            centralManager.connect(peripheral, options: nil)
         } else {
         }
 
@@ -83,15 +87,17 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
 
         var t = self.linkLocal ?? ""
         var p = self.roomNumber ?? ""
-
+        print(t)
         self.getRequest(t + "/v1/guest/local/ble-access-key")
         self.stringNameDevice = "EstBM(" + p + ")"
+        self.sendAct()
         self.sendData(self.keyaccess)
     }
     @IBAction func getCallKey(_ sender: Any) {
         var t = self.linkLocal ?? ""
         self.getRequest(t + "/v1/guest/local/elevator-access-key")
         self.stringNameDevice = "EstEV"
+        self.sendAct()
         self.sendData(self.keyaccess)
     }
     
@@ -119,6 +125,7 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
                             //                            print(data)
                             let key = data["bleAccessKey"] as? String ?? ""
                             self.keyaccess = key
+                            print(key)
                         } else {
                             print("loi")
                         }
@@ -177,12 +184,52 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
         }
         task.resume()
     }
+    
+    func splitByteArray(_ byteArray: [UInt8], maxLength: Int) -> [[UInt8]] {
+        var result: [[UInt8]] = []
+        var index = byteArray.startIndex
+        while index < byteArray.endIndex {
+            let endIndex = byteArray.index(index, offsetBy: maxLength, limitedBy: byteArray.endIndex) ?? byteArray.endIndex
+            let chunk = Array(byteArray[index..<endIndex])
+            result.append(chunk)
+            index = endIndex
+        }
+        return result
+    }
+    
     func sendData(_ send: String) {
-        if let characteristic = self.myCharacteristic {
-            let data = send.data(using: .utf8)!
-            self.peri?.writeValue(data, for: characteristic, type: .withResponse)
+        if let peripheral = peri {
+            if let characteristic = peripheral.services?.first?.characteristics?.first(where: { $0.uuid == CBUUID(string: "0000ffe0-0000-1000-8000-00805f9b34fb") }) {
+                if let data = send.data(using: .utf8) {
+                    let maxLength = 20 // hoặc 22 nếu sử dụng BLE 4.2
+                    var offset = 0
+                    while offset < data.count {
+                        let length = min(data.count - offset, maxLength)
+                        let packet = data.subdata(in: offset..<offset+length)
+                        peri?.writeValue(data, for: characteristic, type: .withResponse)
+                        offset = offset + length
+                        Thread.sleep(forTimeInterval: 0.1) // đợi 100ms trước khi gửi gói dữ liệu tiếp theo
+                    }
+                }
+            } else {
+                print("Không tìm thấy characteristic để gửi dữ liệu")
+            }
         } else {
-            print("Không tìm thấy characteristic để gửi dữ liệu")
+            print("Chưa kết nối với thiết bị BLE")
+        }
+    }
+    
+    func sendAct() {
+        let data = "Act:5282"
+        if let peripheral = peri {
+            if let characteristic = peripheral.services?.first?.characteristics?.first(where: { $0.uuid == CBUUID(string: "0000ffe0-0000-1000-8000-00805f9b34fb") }) {
+                let data = data.data(using: .utf8)!
+                peri?.writeValue(data, for: characteristic, type: .withResponse)
+            } else {
+                print("Không tìm thấy characteristic để gửi dữ liệu")
+            }
+        } else {
+            print("Chưa kết nối với thiết bị BLE")
         }
     }
 }
