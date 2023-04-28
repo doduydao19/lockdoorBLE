@@ -199,37 +199,52 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
     
     func sendData(_ send: String) {
         if let peripheral = peri {
-            if let characteristic = peripheral.services?.first?.characteristics?.first(where: { $0.uuid == CBUUID(string: "0000ffe0-0000-1000-8000-00805f9b34fb") }) {
-                if let data = send.data(using: .utf8) {
-                    let maxLength = 20 // hoặc 22 nếu sử dụng BLE 4.2
-                    var offset = 0
-                    while offset < data.count {
-                        let length = min(data.count - offset, maxLength)
-                        let packet = data.subdata(in: offset..<offset+length)
-                        peri?.writeValue(data, for: characteristic, type: .withResponse)
-                        offset = offset + length
-                        Thread.sleep(forTimeInterval: 0.1) // đợi 100ms trước khi gửi gói dữ liệu tiếp theo
+            if let service = peripheral.services?.first(where: { $0.uuid == CBUUID(string: "0000ffe0-0000-1000-8000-00805f9b34fb") }) {
+                // Tìm đặc tính có UUID tương ứng trong dịch vụ
+                if let characteristic = service.characteristics?.first(where: { $0.uuid == CBUUID(string: "0000ffe1-0000-1000-8000-00805f9b34fb") }) {
+                    if let data = send.data(using: .utf8) {
+                        let maxLength = 20 // hoặc 22 nếu sử dụng BLE 4.2
+                        var offset = 0
+                        while offset < data.count {
+                            let length = min(data.count - offset, maxLength)
+                            let packet = data.subdata(in: offset..<offset+length)
+                            peri?.writeValue(data, for: characteristic, type: .withResponse)
+                            offset = offset + length
+                            Thread.sleep(forTimeInterval: 0.1) // đợi 100ms trước khi gửi gói dữ liệu tiếp theo
+                        }
                     }
+                } else {
+                    print("Không tìm thấy characteristic để gửi dữ liệu")
                 }
             } else {
-                print("Không tìm thấy characteristic để gửi dữ liệu")
+                print("Chưa kết nối với thiết bị BLE")
             }
-        } else {
-            print("Chưa kết nối với thiết bị BLE")
         }
     }
     
     func sendAct() {
         let data = "Act:5282"
         if let peripheral = peri {
-            if let characteristic = peripheral.services?.first?.characteristics?.first(where: { $0.uuid == CBUUID(string: "0000ffe0-0000-1000-8000-00805f9b34fb") }) {
-                let data = data.data(using: .utf8)!
-                peri?.writeValue(data, for: characteristic, type: .withResponse)
+            if let service = peripheral.services?.first(where: { $0.uuid == CBUUID(string: "0000ffe0-0000-1000-8000-00805f9b34fb") }) {
+                // Tìm đặc tính có UUID tương ứng trong dịch vụ
+                if let characteristic = service.characteristics?.first(where: { $0.uuid == CBUUID(string: "0000ffe1-0000-1000-8000-00805f9b34fb") }) {
+                    if let data = data.data(using: .utf8) {
+                        let maxLength = 20 // hoặc 22 nếu sử dụng BLE 4.2
+                        var offset = 0
+                        while offset < data.count {
+                            let length = min(data.count - offset, maxLength)
+                            let packet = data.subdata(in: offset..<offset+length)
+                            peri?.writeValue(data, for: characteristic, type: .withResponse)
+                            offset = offset + length
+                            Thread.sleep(forTimeInterval: 0.1) // đợi 100ms trước khi gửi gói dữ liệu tiếp theo
+                        }
+                    }
+                } else {
+                    print("Không tìm thấy characteristic để gửi dữ liệu")
+                }
             } else {
-                print("Không tìm thấy characteristic để gửi dữ liệu")
+                print("Chưa kết nối với thiết bị BLE")
             }
-        } else {
-            print("Chưa kết nối với thiết bị BLE")
         }
     }
 }
