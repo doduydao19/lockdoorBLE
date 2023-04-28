@@ -37,6 +37,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         textPassword.delegate = self
         signin.tintColor = UIColor.black
         textUsername.textColor = UIColor.white
+        textPassword.textColor = UIColor.white
     }
     
     @IBAction func signin(_ sender: UIButton) {
