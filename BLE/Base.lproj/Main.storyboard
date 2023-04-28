@@ -91,6 +91,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="signin" destination="0Nf-qe-AgO" id="xQc-oF-xCw"/>
                         <outlet property="textPassword" destination="m86-lf-Y6W" id="lIs-Gd-VPi"/>
                         <outlet property="textUsername" destination="vUd-xs-s1c" id="xKc-nV-fEY"/>
                         <segue destination="c5e-M7-1lj" kind="presentation" identifier="abc" modalPresentationStyle="fullScreen" id="mfn-eA-SFa"/>
@@ -234,6 +235,8 @@
                     </view>
                     <navigationItem key="navigationItem" id="A6d-Bc-1IG"/>
                     <connections>
+                        <outlet property="getCallKey" destination="YNa-qY-W8I" id="3cW-in-l1b"/>
+                        <outlet property="getOpenKey" destination="m9V-xF-WGv" id="Zjx-TG-RqN"/>
                         <outlet property="labelStatus" destination="Ktz-jb-jlY" id="Uoz-fc-yEk"/>
                     </connections>
                 </viewController>

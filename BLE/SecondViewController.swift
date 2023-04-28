@@ -22,12 +22,16 @@ class SecondViewController: UIViewController, CBCentralManagerDelegate {
     
     @IBOutlet weak var labelStatus: UILabel!
     
+    @IBOutlet weak var getOpenKey: UIButton!
+    @IBOutlet weak var getCallKey: UIButton!
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
         self.getRoomNumber(self.userName ?? "", self.password ?? "")
         self.centralManager = CBCentralManager(delegate: self, queue: nil)
+        getOpenKey.tintColor = UIColor.black
+        getCallKey.tintColor = UIColor.black
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {

@@ -23,6 +23,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var indicator: UIActivityIndicatorView!
     
+    @IBOutlet weak var signin: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -33,6 +35,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         view.insertSubview(backgroundImage, at: 0)
         textUsername.delegate = self
         textPassword.delegate = self
+        signin.tintColor = UIColor.black
+        textUsername.textColor = UIColor.white
     }
     
     @IBAction func signin(_ sender: UIButton) {
